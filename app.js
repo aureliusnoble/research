@@ -44,7 +44,8 @@ canvas.addEventListener('mousemove', function(event) {
 // Update canvas offset on resize
 window.addEventListener('resize', function() {
     canvasOffset = getCanvasOffset();
-    resizeCanvas(); // Call your existing resizeCanvas function
+    resizeCanvas(); // Adjusts the canvas size
+    initParticles(); // Adjusts the particle count
 });
 
 // Particle class definition
@@ -107,18 +108,31 @@ function interpolateColor(color1, color2, factor) {
     return result;
 }
 
+function calculateDesiredParticleCount() {
+    const area = window.innerWidth * window.innerHeight;
+    return Math.round(area * 0.0002); // Adjust this ratio to match your desired density
+}
+
+
 // Global variables
 let particles = [];
 
 // Initialize particles
 function initParticles() {
-    for (let i = 0; i < NUM_PARTICLES; i++) {
-        const type = Math.floor(Math.random() * 4); // 4 types
-        const x = Math.random() * canvas.width;
-        const y = Math.random() * canvas.height;
-        particles.push(new Particle(type, x, y));
+    const desiredCount = calculateDesiredParticleCount();
+    const currentCount = particles.length;
+    if (currentCount < desiredCount) {
+        for (let i = currentCount; i < desiredCount; i++) {
+            const type = Math.floor(Math.random() * 4); // Assuming 4 types
+            const x = Math.random() * canvas.width;
+            const y = Math.random() * canvas.height;
+            particles.push(new Particle(type, x, y));
+        }
+    } else {
+        particles.length = desiredCount; // Remove excess particles
     }
 }
+
 
 // Force matrix for different particle types (4x4 matrix for 4 particle types)
 let forceMatrix = [];
@@ -238,13 +252,12 @@ function getColorForForce(forceValue) {
 
     return `rgb(${r}, ${g}, ${b})`;
 }
+
 function resizeCanvas() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    // Re-initialize particles or any other necessary elements after resizing
-    initParticles();
+    initParticles(); // Reinitialize particles to adjust the count
 }
-
 resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
 
